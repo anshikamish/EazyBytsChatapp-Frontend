@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat Room</title>
+
+  <!-- WebSocket Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <script defer src="/js/chat.js"></script>
+
+  <!-- Redirect to login if not logged in -->
+  <script>
+    const username = localStorage.getItem("username");
+    if (!username) {
+      window.location.href = "login.html"; // Not logged in
+    } else {
+      // Remove username on refresh (for auto logout on reload)
+      window.addEventListener("beforeunload", () => {
+        localStorage.removeItem("username");
+      });
+    }
+  </script>
+
+  <!-- Message Bubble Style -->
+  <style>
+    .message-bubble {
+      background-color: #d2c4f2;
+      color: black;
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-radius: 15px;
+      max-width: 70%;
+      animation: fadeIn 0.4s ease-in-out;
+      box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <!-- Elegant Styling -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right top, lavender, black);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h2 {
+      color: #fff;
+      margin-top: 20px;
+      font-size: 32px;
+      text-shadow: 1px 1px 2px #444;
+    }
+
+    .chat-container {
+      width: 90%;
+      max-width: 800px;
+      height: 85vh;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 18px;
+      padding: 25px;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    .chat-form {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    .chat-form label {
+      color: lavender;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    .chat-form input {
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+      background-color: rgba(255,255,255,0.8);
+    }
+
+    #message {
+      flex: 1;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #b18bdd, #6a5acd);
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 4px 12px rgba(106, 90, 205, 0.3);
+    }
+
+    button:hover {
+      background-color: #5d4ec5;
+      box-shadow: 0 6px 16px rgba(106, 90, 205, 0.45);
+    }
+
+    #chatArea {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: white;
+      padding: 15px;
+      height: 300px;
+      overflow-y: auto;
+      border-radius: 15px;
+      margin-top: 15px;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+    }
+
+    .message-left { text-align: left; }
+    .message-right { text-align: right; }
+
+    /* Logout button placement */
+    .logout-container {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .logout-container button {
+      background-color: crimson;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3);
+    }
+
+    .logout-container button:hover {
+      background-color: darkred;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      h2 {
+        font-size: 24px;
+      }
+
+      button {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      .chat-form input {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ✅ Logout Button -->
+  <div class="logout-container">
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <h2>Chat Room</h2>
+  <div class="chat-container">
+    <div class="chat-form">
+      <label>Sender Username:</label>
+      <input type="text" id="sender" readonly />
+
+      <label>Receiver Username:</label>
+      <input type="text" id="receiver" placeholder="Enter receiver username" />
+
+      <label>Room Name:</label>
+      <input type="text" id="room" placeholder="Enter room name" required />
+      <button onclick="joinRoom()">Join Room</button>
+
+      <label>Message:</label>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input type="text" id="message" placeholder="Write your message..." />
+        <button onclick="sendMessage()">Send</button>
+        <button onclick="clearChatHistory()">Clear History</button>
+      </div>
+    </div>
+
+    <div id="chatArea"></div>
+  </div>
+
+  <!-- Clear Chat History Script -->
+  <script>
+    function clearChatHistory() {
+      const chatArea = document.getElementById("chatArea");
+      chatArea.innerHTML = "";
+    }
+  </script>
+</body>
+</html>

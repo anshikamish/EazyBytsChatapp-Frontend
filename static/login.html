@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title> Chat App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: lavender;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      color: #5a4e7c;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px 0;
+      color: #6b5b95;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #c8bfea;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #7f76b8;
+      outline: none;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      background-color: #7f76b8;
+      color: white;
+      font-weight: 700;
+      padding: 12px 0;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #5a4e7c;
+    }
+
+    .gif-container {
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 100px;
+    }
+
+    .gif-container img {
+      width: 100%;
+      border-radius: 50%;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .register-link {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #5a4e7c;
+    }
+
+    .register-link a {
+      color: #7f76b8;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    /* ✅ Responsive Design */
+    @media (max-width: 500px) {
+      .login-container {
+        padding: 30px 20px;
+      }
+
+      .gif-container {
+        top: -50px;
+        width: 80px;
+        height: 80px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      button {
+        font-size: 16px;
+        padding: 10px 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <div class="gif-container">
+      <img src="https://media.giphy.com/media/L05HgB2h6qICDs5Sms/giphy.gif" alt="Chat GIF" />
+    </div>
+    <h2>Welcome to Chat App</h2>
+    <form onsubmit="loginUser(event)">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter username" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter password" required />
+
+      <button type="submit">Login</button>
+    </form>
+    <div class="register-link">
+      Don't have an account? <a href="register.html">Register here</a>
+    </div>
+  </div>
+
+  <script>
+    async function loginUser(event) {
+      event.preventDefault();
+
+      const usernameInput = document.getElementById('username').value.trim();
+      localStorage.setItem("username", usernameInput);
+
+      alert("Login successful!");
+      window.location.href = "chat.html";
+    }
+
+    // Auto redirect if already logged in
+    window.onload = () => {
+      if (localStorage.getItem("username")) {
+        window.location.href = "chat.html";
+      }
+    };
+  </script>
+</body>
+</html>

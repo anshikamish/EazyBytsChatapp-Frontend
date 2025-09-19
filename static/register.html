@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register - Chat App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: lavender;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .register-container {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #5a4e7c;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 5px;
+      font-weight: 600;
+      color: #6b5b95;
+      text-align: left;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #c8bfea;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background-color: #7f76b8;
+      color: white;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5a4e7c;
+    }
+
+    @media (max-width: 480px) {
+      .register-container {
+        padding: 30px 20px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      input, button {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h2>Register</h2>
+    <form onsubmit="registerUser(event)">
+      <label for="username">Username</label>
+      <input type="text" id="username" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required />
+
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" required />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" required />
+
+      <!-- Hidden role input to ensure only USER is registered -->
+      <input type="hidden" id="role" value="USER" />
+
+      <button type="submit">Register</button>
+    </form>
+  </div>
+
+  <script>
+    async function registerUser(event) {
+      event.preventDefault();
+
+      const user = {
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+        fullName: document.getElementById("fullName").value,
+        email: document.getElementById("email").value,
+        role: document.getElementById("role").value
+      };
+
+      try {
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(user)
+        });
+
+        if (response.ok) {
+          alert("Registration successful!");
+          window.location.href = "login.html";
+        } else {
+          const error = await response.text();
+          alert("Error: " + error);
+        }
+      } catch (err) {
+        alert("Something went wrong: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
